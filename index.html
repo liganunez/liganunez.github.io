@@ -1,0 +1,684 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Liga Núñez: el mejor torneo de Argentina. Fixture, resultados, tablas, videos, fotos y sedes.">
+<link rel="icon" href="assets-ln-crest.png">
+<title>Liga Núñez Web</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Montserrat:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: barra superior negra tipo portal de competición, selector de torneo, portada con partido destacado, secciones en bandas a lo ancho */
+:root{
+  --ink:#0e0d0c;        /* fondo principal */
+  --ink-2:#181614;      /* superficies */
+  --ink-3:#24211e;      /* bordes y filas */
+  --paper:#f4f2ee;      /* texto principal */
+  --mute:#a29d96;       /* texto secundario */
+  --red:#db1b1b;        /* rojo LN */
+  --comp:#db1b1b;       /* color de la competencia activa */
+  --win:#2fb36b; --draw:#c9a227; --loss:#d84a3a;
+  --display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --body:"Montserrat","Helvetica Neue",Arial,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--ink);color:var(--paper);font:400 15px/1.5 var(--body);overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:#000}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--paper);outline-offset:3px}
+.wrap{max-width:1200px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);text-transform:uppercase;line-height:.92;margin:0;text-wrap:balance;letter-spacing:.005em}
+.eyebrow{font:600 11px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.num{font-variant-numeric:tabular-nums}
+
+/* Barra superior */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:#000;border-bottom:1px solid var(--ink-3)}
+.top .wrap{display:flex;align-items:center;gap:20px;height:64px}
+.brand{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.brand img{height:40px;width:auto}
+.brand .wm{height:15px}
+.nav{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
+.nav::-webkit-scrollbar{display:none}
+.nav a{font:600 13px/1 var(--body);padding:10px 12px;border-radius:2px;white-space:nowrap;color:var(--mute)}
+.nav a:hover{color:var(--paper)}
+.nav a[aria-current="page"]{color:var(--paper);box-shadow:inset 0 -3px 0 var(--red)}
+.app-btn{flex-shrink:0;font:700 12px/1 var(--body);letter-spacing:.06em;text-transform:uppercase;background:var(--red);padding:11px 14px;border-radius:2px}
+@media (max-width:760px){.brand .wm,.app-btn{display:none}.top .wrap{gap:10px}}
+
+/* Selector de competencia */
+.comps{background:var(--ink-2);border-bottom:1px solid var(--ink-3)}
+.comps .wrap{display:flex;gap:6px;overflow-x:auto;padding-block:10px;scrollbar-width:none}
+.comps .wrap::-webkit-scrollbar{display:none}
+.chip{display:flex;align-items:center;gap:8px;flex-shrink:0;padding:6px 12px 6px 6px;border:1px solid var(--ink-3);border-radius:40px;font:600 12px/1 var(--body);color:var(--mute)}
+.chip img{width:28px;height:24px;object-fit:contain}
+.chip .dot{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font:800 11px/1 var(--display);color:#fff}
+.chip[aria-pressed="true"]{border-color:var(--comp);color:var(--paper);background:color-mix(in srgb,var(--comp) 18%,transparent)}
+
+/* Ticker de resultados */
+.ticker{border-bottom:1px solid var(--ink-3);overflow:hidden}
+.ticker .wrap{display:flex;gap:0;overflow-x:auto;scrollbar-width:none}
+.ticker .wrap::-webkit-scrollbar{display:none}
+.tk{flex-shrink:0;padding:10px 18px;border-right:1px solid var(--ink-3);display:grid;grid-template-columns:auto auto;gap:2px 14px;font-size:12px;min-width:170px}
+.tk .st{grid-column:1/-1;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.tk .st.live{color:var(--red)}
+.tk b{font-weight:700;text-align:right}
+
+/* Portada */
+.hero{position:relative;overflow:hidden;border-bottom:1px solid var(--ink-3);
+  background:radial-gradient(120% 90% at 85% 10%,color-mix(in srgb,var(--comp) 55%,transparent),transparent 60%),
+             linear-gradient(180deg,#000,var(--ink))}
+.hero::after{content:"";position:absolute;inset:0;background-image:var(--pattern);background-size:88px;opacity:.06;pointer-events:none}
+.hero .wrap{position:relative;z-index:1;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;padding-block:52px 44px;align-items:end}
+.hero h1{font-size:clamp(56px,10vw,128px);font-weight:900}
+.hero h1 span{display:block;color:var(--comp);filter:brightness(1.25)}
+.hero p{max-width:46ch;color:#d9d5cf;margin:18px 0 0}
+.hero .crest{width:clamp(90px,14vw,150px);margin-bottom:22px}
+.match{background:rgba(0,0,0,.55);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.1);border-top:4px solid var(--comp);padding:22px;display:grid;gap:16px}
+.match .row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px}
+.team{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;font:700 14px/1.2 var(--body);min-width:0}
+.badge{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font:900 22px/1 var(--display);color:#fff;border:2px solid rgba(255,255,255,.25)}
+.score{font:900 64px/1 var(--display);letter-spacing:.02em}
+.match .meta{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-size:12px;color:var(--mute);border-top:1px solid rgba(255,255,255,.1);padding-top:12px}
+.pill{display:inline-flex;align-items:center;gap:6px;font:700 10px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;padding:6px 8px;border-radius:2px;background:var(--red);color:#fff}
+.pill.live::before{content:"";width:6px;height:6px;border-radius:50%;background:#fff;animation:blink 1.2s infinite}
+@keyframes blink{50%{opacity:.2}}
+@media (prefers-reduced-motion:reduce){.pill.live::before{animation:none}}
+@media (max-width:860px){.hero .wrap{grid-template-columns:1fr;padding-block:36px}.score{font-size:52px}}
+
+/* Secciones */
+main section{padding-block:48px;border-bottom:1px solid var(--ink-3)}
+.sec-head{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+.sec-head h2{font-size:clamp(40px,6vw,64px);font-weight:900}
+.sec-head .src{font-size:12px;color:var(--mute);display:flex;align-items:center;gap:8px}
+.src i{width:8px;height:8px;border-radius:50%;background:var(--win);display:inline-block}
+.src i.app{background:var(--red)}
+.more{font:700 12px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;border-bottom:2px solid var(--comp);padding-bottom:4px}
+
+/* Fixture */
+.tabs{display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap}
+.tab{padding:9px 14px;border:1px solid var(--ink-3);font:600 12px/1 var(--body);color:var(--mute);border-radius:2px}
+.tab[aria-selected="true"]{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+.fx{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1px;background:var(--ink-3);border:1px solid var(--ink-3)}
+.fx-item{background:var(--ink-2);padding:14px 16px;display:grid;grid-template-columns:1fr auto;gap:6px 12px;align-items:center}
+.fx-item .t{display:flex;align-items:center;gap:10px;font-weight:600;font-size:14px;min-width:0}
+.fx-item .t span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fx-item .t.w{color:var(--paper)} .fx-item .t.l{color:var(--mute)}
+.mini{width:24px;height:24px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;font:900 11px/1 var(--display);color:#fff}
+.fx-item .g{font:800 22px/1 var(--display);text-align:right}
+.fx-item .info{grid-column:1/-1;display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--mute);border-top:1px dashed var(--ink-3);padding-top:8px;margin-top:4px}
+.fx-item .info .live{color:var(--red);font-weight:700}
+@media (max-width:420px){.fx{grid-template-columns:1fr}}
+
+/* Tabla */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--ink-3)}
+table{width:100%;border-collapse:collapse;min-width:620px;font-size:14px}
+th{font:600 10px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--mute);text-align:center;padding:12px 8px;background:#000;position:sticky;top:0}
+th.l,td.l{text-align:left}
+td{padding:11px 8px;text-align:center;border-top:1px solid var(--ink-3);font-variant-numeric:tabular-nums}
+tr.q td:first-child{box-shadow:inset 3px 0 0 var(--comp)}
+tr.r td:first-child{box-shadow:inset 3px 0 0 var(--loss)}
+td.pts{font:800 18px/1 var(--display)}
+td.club{display:flex;align-items:center;gap:10px;font-weight:600}
+.form{display:flex;gap:3px;justify-content:center}
+.form i{width:18px;height:18px;border-radius:2px;font:700 9px/18px var(--body);font-style:normal;color:#fff}
+.form .W{background:var(--win)}.form .D{background:var(--draw)}.form .L{background:var(--loss)}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--mute);margin-top:12px}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;margin-right:6px;vertical-align:-1px;background:var(--c)}
+
+/* Goleadores */
+.scorers{display:grid;grid-template-columns:1fr 1.4fr;gap:24px}
+.leader{background:var(--comp);position:relative;overflow:hidden;padding:24px;min-height:300px;display:flex;flex-direction:column;justify-content:space-between}
+.leader::after{content:"";position:absolute;right:-30px;bottom:-30px;width:230px;height:250px;background:var(--symbol) center/contain no-repeat;opacity:.18}
+.leader .n{font:900 clamp(56px,8vw,96px)/.85 var(--display);text-transform:uppercase}
+.leader .g{font:900 120px/.8 var(--display)}
+.leader .g small{font:700 13px/1 var(--body);letter-spacing:.1em;display:block;margin-top:8px}
+.sc-list{display:grid;gap:1px;background:var(--ink-3);border:1px solid var(--ink-3);align-content:start}
+.sc{background:var(--ink-2);display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:12px;padding:12px 14px}
+.sc .p{font:800 18px/1 var(--display);color:var(--mute)}
+.sc .who b{display:block;font-weight:700}
+.sc .who small{color:var(--mute);font-size:12px}
+.sc .bar{display:flex;align-items:center;gap:10px;font:800 22px/1 var(--display)}
+.sc .bar i{display:block;height:6px;background:var(--comp);border-radius:1px}
+@media (max-width:760px){.scorers{grid-template-columns:1fr}}
+
+/* Galería */
+.gal{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:180px;gap:8px}
+.ph{position:relative;overflow:hidden;background:var(--ink-2);display:flex;align-items:flex-end;padding:12px}
+.ph:nth-child(1){grid-column:span 2;grid-row:span 2}
+.ph::before{content:"";position:absolute;inset:0;background:var(--g)}
+.ph::after{content:"";position:absolute;inset:auto -20px -20px auto;width:110px;height:120px;background:var(--symbol) center/contain no-repeat;opacity:.12}
+.ph div{position:relative;z-index:1}
+.ph b{font:800 22px/1 var(--display);text-transform:uppercase;display:block}
+.ph small{font-size:11px;color:#e7e2db}
+.ph .cnt{position:absolute;top:10px;right:10px;z-index:1;font:700 10px/1 var(--body);letter-spacing:.1em;background:rgba(0,0,0,.6);padding:6px 8px}
+@media (max-width:760px){.gal{grid-template-columns:repeat(2,1fr);grid-auto-rows:140px}}
+
+/* Competencias */
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.ccard{background:var(--ink-2);border:1px solid var(--ink-3);padding:20px 16px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;transition:border-color .15s}
+.ccard:hover{border-color:var(--c)}
+.ccard img{height:110px;width:auto;object-fit:contain}
+.ccard .ph-logo{height:110px;width:110px;border-radius:50%;display:grid;place-items:center;font:900 34px/1 var(--display);background:var(--c);color:#fff}
+.ccard b{font:800 22px/1 var(--display);text-transform:uppercase}
+.ccard small{color:var(--mute);font-size:12px}
+
+/* App */
+.appband{background:var(--red);border-bottom:0}
+.appband .wrap{display:grid;grid-template-columns:1.2fr 1fr;gap:32px;align-items:center}
+.appband h2{font-size:clamp(48px,7vw,84px);font-weight:900}
+.appband p{max-width:44ch}
+.stores{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.store{background:#000;padding:12px 18px;border-radius:4px;font:600 13px/1.2 var(--body)}
+.store small{display:block;font-size:10px;color:var(--mute);letter-spacing:.08em;text-transform:uppercase}
+.phone{justify-self:center;width:230px;aspect-ratio:9/18.5;max-width:100%;background:#000;border-radius:34px;border:8px solid #000;box-shadow:0 30px 60px rgba(0,0,0,.35);overflow:hidden;display:flex;flex-direction:column}
+.phone .scr{flex:1;background:var(--ink);padding:16px 12px;display:flex;flex-direction:column;gap:10px}
+.phone .scr img{height:auto;width:100%;max-width:100%;align-self:flex-start}
+.phone .mc{background:var(--ink-2);border-left:3px solid var(--red);padding:10px;font-size:11px;display:flex;justify-content:space-between}
+.phone .mc b{font:800 16px/1 var(--display)}
+@media (max-width:760px){.appband .wrap{grid-template-columns:1fr}}
+
+/* Conexiones */
+.flow{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.node{border:1px solid var(--ink-3);padding:18px;background:var(--ink-2)}
+.node h3{font-size:28px;margin-bottom:8px}
+.node ul{margin:0;padding-left:18px;color:#d9d5cf;font-size:13px;display:grid;gap:4px}
+.node code{font-size:12px;background:#000;padding:1px 5px;border-radius:2px}
+.node.web{border-color:var(--red)}
+.status{display:inline-flex;gap:6px;align-items:center;font:700 10px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;padding:6px 8px;border:1px solid var(--draw);color:var(--draw);margin-bottom:12px}
+@media (max-width:760px){.flow{grid-template-columns:1fr}}
+
+.demo-note{background:#000;border-bottom:1px solid var(--ink-3);font-size:12px;color:var(--mute)}
+.demo-note .wrap{padding-block:8px;display:flex;gap:8px;align-items:center}
+.demo-note b{color:var(--draw)}
+footer{background:#000}
+footer .wrap{padding-block:40px;display:flex;flex-wrap:wrap;gap:24px;justify-content:space-between;align-items:center;font-size:12px;color:var(--mute)}
+footer img{height:40px;width:auto}
+.accounts{display:flex;flex-wrap:wrap;gap:6px 14px}
+[data-view]{scroll-margin-top:130px}
+
+/* Selector de torneo y división */
+.picker{border-bottom:1px solid var(--ink-3);background:var(--ink)}
+.picker .wrap{display:flex;align-items:center;gap:14px;padding-block:10px;flex-wrap:wrap}
+.sel{display:flex;align-items:center;gap:8px}
+.sel select{background:var(--ink-2);color:var(--paper);border:1px solid var(--ink-3);border-radius:2px;padding:8px 10px;font:600 13px var(--body)}
+.divs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
+.divs::-webkit-scrollbar{display:none}
+.dv{flex-shrink:0;padding:8px 12px;border:1px solid var(--ink-3);font:700 11px/1 var(--body);letter-spacing:.06em;color:var(--mute);border-radius:2px}
+.dv[aria-selected="true"],.dv.solo{color:var(--paper);border-color:var(--comp);background:color-mix(in srgb,var(--comp) 22%,transparent)}
+.search{position:relative;width:240px;max-width:100%}
+.search input{width:100%;background:var(--ink-2);color:var(--paper);border:1px solid var(--ink-3);border-radius:2px;padding:9px 12px;font:500 13px var(--body)}
+.results{position:absolute;right:0;top:calc(100% + 6px);width:min(360px,90vw);background:#000;border:1px solid var(--ink-3);z-index:40;max-height:60vh;overflow:auto}
+.results button{display:flex;gap:10px;align-items:center;width:100%;text-align:left;padding:10px 12px;border-bottom:1px solid var(--ink-3)}
+.results button:hover{background:var(--ink-2)}
+.results small{display:block;color:var(--mute);font-size:11px}
+@media (max-width:760px){.search{width:100%}}
+.tk{text-align:left;cursor:pointer}
+.tk:hover{background:var(--ink-2)}
+.tabs.scroll{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+.tabs.scroll::-webkit-scrollbar{display:none}
+.tab{flex-shrink:0}
+.mini.img,.badge.img{background:#fff;overflow:hidden;padding:2px}
+.mini img,.badge img{width:100%;height:100%;object-fit:contain}
+.badge.img{padding:4px}
+.club{display:flex;align-items:center;gap:10px;font-weight:600}
+.fx-item .info .next{color:var(--comp);filter:brightness(1.3);font-weight:700}
+.empty{color:var(--mute);padding:20px 0;margin:0}
+.src i.pend{background:var(--draw)}
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.stat{background:var(--ink-2);border:1px solid var(--ink-3);border-top:3px solid var(--comp);padding:18px;display:flex;gap:14px;align-items:flex-start}
+.stat .v{font:900 54px/1 var(--display);margin:8px 0 4px}
+.stat .s{font-size:12px;color:#d9d5cf}
+.ph .vs{position:absolute;top:12px;left:12px;z-index:1;display:flex;gap:6px}
+.ph .vs .badge{width:44px;height:44px}
+.ph:nth-child(1) .vs .badge{width:72px;height:72px}
+
+.claim{display:inline-block;font:800 13px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;background:var(--paper);color:#000;padding:8px 12px;margin-bottom:22px}
+.gal-ctrl{display:flex;gap:8px}
+.arrow{width:44px;height:44px;border:1px solid var(--ink-3);border-radius:50%;font-size:18px;display:grid;place-items:center}
+.arrow:hover{border-color:var(--paper)}
+.slider{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;scroll-behavior:smooth;padding-bottom:4px}
+.slider::-webkit-scrollbar{display:none}
+.slide{flex:0 0 auto;width:min(78vw,520px);aspect-ratio:3/2;max-width:100%;position:relative;scroll-snap-align:start;background:var(--ink-2);overflow:hidden;margin:0}
+.slide.v{width:min(52vw,300px);aspect-ratio:2/3}
+.slide img{width:100%;height:100%;object-fit:cover;display:block}
+.slide figcaption{position:absolute;left:0;right:0;bottom:0;padding:24px 12px 10px;background:linear-gradient(transparent,rgba(0,0,0,.75));font:700 12px/1.3 var(--body);letter-spacing:.06em;text-transform:uppercase}
+.gal-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:18px;color:var(--mute);font-size:13px}
+.cta{background:var(--red);color:#fff;font:700 12px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;border-radius:2px}
+.sedes{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.sede{position:relative;aspect-ratio:4/3;max-width:100%;overflow:hidden;background:var(--ink-2);display:flex;align-items:flex-end}
+.sede img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.sede::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.85))}
+.sede div{position:relative;z-index:1;padding:14px}
+.sede b{display:block;font:900 32px/.9 var(--display);text-transform:uppercase}
+.sede small{font:600 11px/1.4 var(--body);letter-spacing:.1em;text-transform:uppercase;color:#e7e2db}
+.redes{background:#000}
+.redes-lead{font:600 clamp(18px,2.4vw,26px)/1.35 var(--body);max-width:38ch;margin:0 0 18px}
+.formats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px}
+.formats span{border:1px solid var(--red);color:var(--paper);font:700 11px/1 var(--body);letter-spacing:.1em;text-transform:uppercase;padding:9px 12px;border-radius:40px}
+.accts{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.acct{display:flex;align-items:center;gap:12px;padding:14px;background:var(--ink-2);border:1px solid var(--ink-3)}
+.acct:hover{border-color:var(--red)}
+.acct.yt{border-color:#3a1414;background:linear-gradient(90deg,#2a0d0d,var(--ink-2))}
+.acct .lg{width:48px;height:48px;flex-shrink:0;display:grid;place-items:center;border-radius:50%;background:#111;overflow:hidden}
+.acct .lg img{width:62%;height:62%;object-fit:contain}
+.acct b{display:block;font-weight:700}
+.acct small{color:var(--mute);font-size:12px;line-height:1.3;display:block}
+
+.news{display:grid;grid-template-columns:2fr 1fr 1fr;grid-auto-rows:minmax(220px,auto);gap:12px}
+.nw{position:relative;overflow:hidden;background:var(--ink-2);display:flex;align-items:flex-end;min-height:220px;cursor:pointer;text-align:left;width:100%}
+.nw:first-child{grid-row:span 2}
+.nw img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .4s}
+.nw:hover img{transform:scale(1.04)}
+.nw::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 30%,rgba(0,0,0,.9))}
+.nw div{position:relative;z-index:1;padding:16px}
+.nw .tag{display:inline-block;font:700 10px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;background:var(--c,var(--red));color:#fff;padding:5px 7px;margin-bottom:10px}
+.nw h3{font-size:clamp(22px,2.6vw,30px);font-weight:900;line-height:.95}
+.nw:first-child h3{font-size:clamp(30px,4.4vw,56px)}
+.nw p{margin:8px 0 0;font-size:13px;color:#e7e2db;max-width:52ch}
+@media (max-width:860px){.news{grid-template-columns:1fr 1fr}.nw:first-child{grid-column:1/-1;grid-row:auto;min-height:320px}}
+@media (max-width:520px){.news{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.nw img{transition:none}}
+
+.vids{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.vid{display:flex;flex-direction:column;gap:8px;min-width:0}
+.vid .th{position:relative;aspect-ratio:16/9;max-width:100%;overflow:hidden;background:var(--ink-2)}
+.vid .th img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s}
+.vid:hover .th img{transform:scale(1.04)}
+.vid .play{position:absolute;inset:0;display:grid;place-items:center}
+.vid .play i{width:48px;height:48px;border-radius:50%;background:rgba(219,27,27,.92);display:grid;place-items:center}
+.vid .play i::after{content:"";border-left:14px solid #fff;border-top:9px solid transparent;border-bottom:9px solid transparent;margin-left:4px}
+.vid .dur{position:absolute;right:6px;bottom:6px;background:rgba(0,0,0,.8);font:700 11px/1 var(--body);padding:4px 6px;border-radius:2px}
+.vid b{font:800 18px/1.05 var(--display);text-transform:uppercase}
+.vid small{color:var(--mute);font-size:12px}
+.vlink{display:inline-flex;align-items:center;gap:5px;color:#fff;background:#b31217;font:700 10px/1 var(--body);letter-spacing:.06em;text-transform:uppercase;padding:5px 7px;border-radius:2px}
+.vlink::before{content:"";border-left:6px solid #fff;border-top:4px solid transparent;border-bottom:4px solid transparent}
+@media (max-width:860px){.vids{grid-template-columns:repeat(2,1fr)}}
+@media (prefers-reduced-motion:reduce){.vid .th img{transition:none}}
+</style>
+
+
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#inicio" aria-label="Liga Núñez inicio">
+      <img src="assets-ln-crest.png" alt="">
+      <img class="wm" src="assets-ln-wordmark.png" alt="Liga Núñez">
+    </a>
+    <nav class="nav" id="nav" aria-label="Secciones">
+      <a href="#inicio">Inicio</a>
+      <a href="#noticias">Noticias</a>
+      <a href="#partidos">Partidos</a>
+      <a href="#tablas">Tablas</a>
+      <a href="#numeros">Números</a>
+      <a href="#competiciones">Competiciones</a>
+      <a href="#galeria">Galería</a>
+      <a href="#videos">Videos</a>
+      <a href="#sedes">Sedes</a>
+      <a href="#redes">Redes</a>
+    </nav>
+    <a class="app-btn" href="https://play.google.com/store/apps/details?id=com.ibaires.liganunez" target="_blank" rel="noopener">Bajate la app</a>
+  </div>
+</header>
+
+<div class="comps" role="toolbar" aria-label="Competencia"><div class="wrap" id="comps"></div></div>
+
+<div class="picker"><div class="wrap">
+  <label class="sel"><span class="eyebrow">Torneo</span>
+    <select id="stage" aria-label="Torneo"></select></label>
+  <div class="divs" id="divs" role="tablist" aria-label="División"></div>
+  <div class="search">
+    <input id="q" type="search" placeholder="Buscá tu equipo" autocomplete="off" aria-label="Buscar equipo">
+    <div class="results" id="results" hidden></div>
+  </div>
+</div></div>
+
+<div class="ticker" aria-label="Últimos resultados"><div class="wrap" id="ticker"></div></div>
+
+<main>
+  <div class="hero" id="inicio" data-view>
+    <div class="wrap">
+      <div>
+        <div class="claim">El mejor torneo de Argentina</div>
+        <img class="crest" id="heroCrest" src="assets-ln-crest.png" alt="">
+        <div class="eyebrow" id="heroEyebrow"></div>
+        <h1 id="heroTitle"></h1>
+        <p id="heroText"></p>
+      </div>
+      <div class="match" id="heroMatch"></div>
+    </div>
+  </div>
+
+  <section id="noticias" data-view><div class="wrap">
+    <div class="sec-head">
+      <div><div class="eyebrow">Lo que dejó la fecha</div><h2>Noticias</h2></div>
+      <div class="src">Armadas con los resultados de la app</div>
+    </div>
+    <div class="news" id="news"></div>
+  </div></section>
+
+  <section id="partidos" data-view><div class="wrap">
+    <div class="sec-head">
+      <div><div class="eyebrow" id="fxEyebrow">Fixture y resultados</div><h2>Partidos</h2></div>
+      <div class="src"><i class="app"></i> Datos de la app oficial · <span id="updated"></span></div>
+    </div>
+    <div class="tabs scroll" role="tablist" id="rounds"></div>
+    <div class="fx" id="fixture"></div>
+  </div></section>
+
+  <section id="tablas" data-view><div class="wrap">
+    <div class="sec-head">
+      <div><div class="eyebrow" id="tblEyebrow">Posiciones</div><h2>Tabla</h2></div>
+      <div class="tabs" id="zones" role="tablist"></div>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>#</th><th class="l">Equipo</th><th>PJ</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>DIF</th><th>PTS</th><th>Últimos 5</th></tr></thead>
+      <tbody id="table"></tbody>
+    </table></div>
+    <div class="legend" id="legend"></div>
+  </div></section>
+
+  <section id="numeros" data-view><div class="wrap">
+    <div class="sec-head">
+      <div><div class="eyebrow" id="numEyebrow">La división en números</div><h2>Números</h2></div>
+      <div class="src"><i class="pend"></i> Goleadores: se suman cuando la app los habilite para la web</div>
+    </div>
+    <div class="stats" id="stats"></div>
+  </div></section>
+
+  <section id="competiciones" data-view><div class="wrap">
+    <div class="sec-head">
+      <div><div class="eyebrow">Temporada 2026</div><h2>Competiciones</h2></div>
+    </div>
+    <div class="cgrid" id="cgrid"></div>
+  </div></section>
+
+  <section id="galeria" data-view><div class="wrap">
+    <div class="sec-head">
+      <div><div class="eyebrow" id="galEyebrow">Fotos de la última fecha</div><h2>Galería</h2></div>
+      <div class="gal-ctrl">
+        <button class="arrow" id="galPrev" aria-label="Fotos anteriores">&larr;</button>
+        <button class="arrow" id="galNext" aria-label="Fotos siguientes">&rarr;</button>
+      </div>
+    </div>
+    <div class="slider" id="slider" tabindex="0" aria-label="Fotos de la última fecha"></div>
+    <div class="gal-foot">
+      <span>Todas las fotos de cada partido, ordenadas por día, sede y fecha.</span>
+      <a class="cta" href="https://drive.google.com/drive/folders/146O1sm7A8QGnxrEEsL4IGNtCf7H7GPBG" target="_blank" rel="noopener">Ver todas las fotos en Drive &rarr;</a>
+    </div>
+  </div></section>
+
+  <section id="videos" data-view><div class="wrap">
+    <div class="sec-head">
+      <div><div class="eyebrow">Partidos completos</div><h2>Videos</h2></div>
+      <a class="cta" href="https://www.youtube.com/@liganunez10" target="_blank" rel="noopener">Ver el canal en YouTube &rarr;</a>
+    </div>
+    <div class="vids" id="vids"></div>
+  </div></section>
+
+  <section id="sedes" data-view><div class="wrap">
+    <div class="sec-head">
+      <div><div class="eyebrow">Dónde se juega</div><h2>Sedes</h2></div>
+      <div class="src">Fotos de las canchas, de la última fecha jugada en cada sede</div>
+    </div>
+    <div class="sedes" id="sedesGrid"></div>
+  </div></section>
+
+  <section id="redes" class="redes" data-view><div class="wrap">
+    <div class="sec-head">
+      <div><div class="eyebrow">Seguinos</div><h2>Redes</h2></div>
+    </div>
+    <p class="redes-lead">Tenemos la mejor cobertura de redes sociales: historias, reels y publicaciones de cada partido, y coberturas personalizadas para cada equipo.</p>
+    <div class="formats"><span>Historias</span><span>Reels</span><span>Publicaciones</span><span>Partidos completos en YouTube</span><span>Coberturas personalizadas</span></div>
+    <div class="accts" id="accts"></div>
+  </div></section>
+
+  <section class="appband" id="app" data-view><div class="wrap">
+    <div>
+      <div class="eyebrow" style="color:#fff;opacity:.85">App oficial</div>
+      <h2>Tu equipo en el bolsillo</h2>
+      <p>Resultados, tablas, figuras, fair play y sancionados de cada partido, con notificaciones cuando se cargan los resultados. Los datos de esta web salen de la misma app.</p>
+      <div class="stores">
+        <a class="store" href="https://apps.apple.com/ar/search?term=liga%20nu%C3%B1ez%20oficial" target="_blank" rel="noopener"><small>Descargala en</small>App Store</a>
+        <a class="store" href="https://play.google.com/store/apps/details?id=com.ibaires.liganunez" target="_blank" rel="noopener"><small>Disponible en</small>Google Play</a>
+      </div>
+    </div>
+    <div class="phone" aria-hidden="true"><div class="scr" id="phone"></div></div>
+  </div></section>
+</main>
+
+<footer><div class="wrap">
+  <img src="assets-ln-crest.png" alt="Liga Núñez">
+  <div class="accounts" id="accounts"></div>
+  <div id="foot">© 2026 Liga Núñez</div>
+</div></footer>
+
+<script>
+const COMPS = [
+  {id:"primera",name:"Primera División",short:"Primera",color:"#db1b1b",logo:"assets-primera1ln.png",mark:"1ª",acct:"@liganunez",text:"La máxima categoría de Liga Núñez, con Primera B Nacional debajo."},
+  {id:"libertadores",name:"Copa Núñez Libertadores",short:"Libertadores",color:"#7a3bbf",logo:"assets-libertadores.png",acct:"@liganunez",text:"La copa grande de la liga, en Mayores, Sub 19 y Sub 16.",cup:true},
+  {id:"sudamericana",name:"Copa Núñez Sudamericana",short:"Sudamericana",color:"#2648b8",logo:"assets-sudamericana.png",acct:"@liganunez",text:"La segunda copa internacional de Liga Núñez, con cobertura especial en cada cruce.",cup:true},
+  {id:"lunes",name:"Superliga Lunes",short:"Lunes",color:"#189a2c",logo:"assets-lunes.png",acct:"@liganunezplus",text:"Arrancar la semana con pelota."},
+  {id:"viernes",name:"Superliga Viernes",short:"Viernes",color:"#c9b80a",logo:"assets-viernes.png",acct:"@liganunezplus",text:"El after office se juega en cancha."},
+  {id:"sabado",name:"Superliga Sábado",short:"Sábado",color:"#2a62c4",logo:"assets-sabado.png",acct:"@liganunezplus",text:"La fecha más pesada del fin de semana."},
+  {id:"domingo",name:"Superliga Domingo",short:"Domingo",color:"#e8141a",logo:"assets-domingo.png",acct:"@liganunezplus",text:"Cerrar el finde jugando."},
+  {id:"juvenil",name:"La Copa Juvenil",short:"Copa Juvenil",color:"#d3202f",logo:"assets-juvenil.png",acct:"@lacopajuvenil",text:"Sub 19, Sub 16 y Sub 14: las próximas generaciones de la liga."},
+  {id:"f5",name:"Liga Núñez FEM",short:"FEM",color:"#e5177e",logo:"assets-fem.png",acct:"@liganunezfem",text:"El fútbol femenino de Liga Núñez, sábados y domingos."},
+  {id:"f7",name:"Fútbol 7 Mixto",short:"Mixto",color:"#13a39a",logo:null,mark:"F7",acct:"@liganunez",text:"El fútbol 7 mixto de Liga Núñez."},
+  {id:"villanueva",name:"Liga Villanueva",short:"Villanueva",color:"#c4262e",logo:"assets-villanueva.png",mark:"LV",acct:"@ligavillanueva",text:"Toda la Liga Villanueva, fecha por fecha."}
+];
+const ACCOUNTS=["@liganunez","@liganunezplus","@liganunezfem","@lacopajuvenil","@ligapuertomadero","@ligamartinez","@ligatigre","@ligavillanueva"];
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const pretty=s=>String(s||"").replace(/\s*[.(]\s*(lib|sud|libertadores|sudamericana)\)?\s*$/i,"").toLowerCase().replace(/(^|[\s.(/-])([a-záéíóúñü])/g,(m,a,b)=>a+b.toUpperCase()).replace(/\bFc\b/g,"FC").replace(/\b(Cf|Ac|Ca|Cd|Sc|Ud)\b/g,m=>m.toUpperCase());
+const ini=n=>(String(n).replace(/[^A-ZÁÉÍÓÚÑ0-9 ]/gi,"").split(/\s+/).filter(w=>w.length>1&&!/^(fc|de|la|el|los|las|club)$/i.test(w)).map(w=>w[0]).join("")||String(n).slice(0,2)).slice(0,2).toUpperCase();
+const hue=n=>{let h=0;for(const c of String(n))h=(h*31+c.charCodeAt(0))%360;return h};
+let DB=null, ESC={};
+const badge=(n,cls="mini")=>ESC[n]?`<span class="${cls} img"><img src="${ESC[n]}" alt="" loading="lazy"></span>`:`<span class="${cls}" style="background:hsl(${hue(n)} 45% 32%)">${esc(ini(n))}</span>`;
+document.documentElement.style.setProperty("--symbol","url('assets-ln-symbol.png')");
+document.documentElement.style.setProperty("--pattern","url('assets-ln-symbol.png')");
+
+const st={comp:"primera",stage:null,tid:null,round:null,zone:0};
+try{const s=JSON.parse(localStorage.getItem("ln-web")||"{}");Object.assign(st,s,{round:null,zone:0})}catch(e){}
+const save=()=>{try{localStorage.setItem("ln-web",JSON.stringify({comp:st.comp,stage:st.stage,tid:st.tid}))}catch(e){}};
+
+const byComp=c=>DB.torneos.filter(t=>t.comp===c);
+function stagesOf(c){const m=new Map();for(const t of byComp(c)){const s=m.get(t.stage)||{name:t.stage,max:0,list:[]};s.max=Math.max(s.max,t.id);s.list.push(t);m.set(t.stage,s)}
+  return [...m.values()].sort((a,b)=>b.max-a.max).map(s=>({...s,list:s.list.sort((a,b)=>a.r-b.r||a.id-b.id)}))}
+const played=m=>m[2]!=null&&m[3]!=null;
+function lastPlayedRound(t){let k=-1;t.f.forEach((f,i)=>{if(f.m.some(played))k=i});return k}
+function defaultRound(t){const k=lastPlayedRound(t);if(k<0)return 0;const nxt=t.f.findIndex((f,i)=>i>k&&f.m.length&&!f.m.some(played));return k}
+function form(t){const map={};t.f.forEach(f=>f.m.filter(played).forEach(m=>{const[a,b,g1,g2]=m;(map[a]=map[a]||[]).push(g1>g2?"W":g1<g2?"L":"D");(map[b]=map[b]||[]).push(g2>g1?"W":g2<g1?"L":"D")}));return map}
+function result(m){const[a,b,g1,g2,wo,p1,p2]=m;if(!played(m))return "Por jugar";if(wo)return "Ganó "+pretty(wo===1?a:b)+" sin jugar";if(p1!=null&&p2!=null&&(p1||p2))return `Final · penales ${p1}-${p2}`;return "Final"}
+
+function renderComps(){
+  $("#comps").innerHTML=COMPS.map(c=>`<button class="chip" aria-pressed="${c.id===st.comp}" data-id="${c.id}" style="--comp:${c.color}">
+    ${c.logo?`<img src="${c.logo}" alt="">`:`<span class="dot" style="background:${c.color}">${c.mark}</span>`}${c.short}</button>`).join("");
+  $("#cgrid").innerHTML=COMPS.map(c=>{const ts=byComp(c.id), n=ts.reduce((s,t)=>s+t.f.reduce((a,f)=>a+f.m.filter(played).length,0),0), teams=new Set(ts.flatMap(t=>t.z.flatMap(z=>z.rows.map(r=>r[0])))).size;
+    return `<a class="ccard" href="#inicio" data-id="${c.id}" style="--c:${c.color}">
+    ${c.logo?`<img src="${c.logo}" alt="">`:`<span class="ph-logo">${c.mark}</span>`}
+    <b>${c.name}</b><small class="num">${ts.length} torneos · ${teams} equipos · ${n} partidos</small><small>${c.acct}</small></a>`}).join("");
+}
+
+function pick(){
+  const c=COMPS.find(x=>x.id===st.comp)||COMPS[0]; st.comp=c.id;
+  const stages=stagesOf(c.id); let s=stages.find(x=>x.name===st.stage)||stages[0]; st.stage=s.name;
+  let t=s.list.find(x=>x.id===st.tid)||s.list[0]; st.tid=t.id;
+  if(st.round==null||st.round>=t.f.length)st.round=defaultRound(t);
+  if(st.zone>=t.z.length)st.zone=0;
+  return {c,stages,s,t};
+}
+
+function render(){
+  const {c,stages,s,t}=pick(); save();
+  document.documentElement.style.setProperty("--comp",c.color);
+  document.querySelectorAll(".chip").forEach(b=>b.setAttribute("aria-pressed",b.dataset.id===c.id));
+  $("#stage").innerHTML=stages.map(x=>`<option ${x.name===s.name?"selected":""}>${esc(x.name)}</option>`).join("");
+  $("#divs").innerHTML=s.list.length>1?s.list.map(x=>`<button class="dv" role="tab" aria-selected="${x.id===t.id}" data-tid="${x.id}">${esc(x.div)}</button>`).join(""):`<span class="dv solo">${esc(t.div)}</span>`;
+
+  // Ticker: último resultado de cada división del torneo
+  $("#ticker").innerHTML=s.list.map(x=>{const k=lastPlayedRound(x);if(k<0)return "";const m=x.f[k].m.filter(played).slice(-1)[0];
+    return `<button class="tk num" data-tid="${x.id}"><span class="st">${esc(x.div)} · ${esc(x.f[k].n)}</span><span>${esc(pretty(m[0]))}</span><b>${m[2]}</b><span>${esc(pretty(m[1]))}</span><b>${m[3]}</b></button>`}).join("");
+
+  // Portada
+  const crest=$("#heroCrest"); crest.src=(c.id==="primera"&&/^PRIMERA B/.test(t.div))?"assets-bnacional.png":(c.logo||"assets-ln-crest.png");
+  $("#heroEyebrow").textContent=`Temporada 2026 · ${s.name} · ${t.div}`;
+  const w=c.name.split(" "),last=w.pop(); $("#heroTitle").innerHTML=`${esc(w.join(" "))}<span>${esc(last)}</span>`;
+  const jug=t.f.reduce((a,f)=>a+f.m.filter(played).length,0), tot=t.f.reduce((a,f)=>a+f.m.length,0);
+  const nTeams=new Set(t.z.flatMap(z=>z.rows.map(r=>r[0]))).size;
+  $("#heroText").textContent=`${c.text} ${t.div}: ${nTeams} equipos, ${jug} de ${tot} partidos jugados.`;
+  const k=lastPlayedRound(t); const hm=k>=0?t.f[k].m.filter(played).slice(-1)[0]:t.f[0]?.m[0];
+  $("#heroMatch").innerHTML=hm?`
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+      <span class="pill">${played(hm)?"Último resultado":"Próximo partido"}</span><span class="eyebrow">${esc(t.f[k>=0?k:0].n)}</span></div>
+    <div class="row">
+      <div class="team">${badge(hm[0],"badge")}${esc(pretty(hm[0]))}</div>
+      <div class="score num">${played(hm)?`${hm[2]}–${hm[3]}`:"vs"}</div>
+      <div class="team">${badge(hm[1],"badge")}${esc(pretty(hm[1]))}</div>
+    </div>
+    <div class="meta"><span>${esc(t.div)}</span><span>${(()=>{const v=played(hm)&&vidFor(hm[0],hm[1]);return v?`<a class="vlink" href="https://www.youtube.com/watch?v=${v.id}" target="_blank" rel="noopener">Ver partido</a> `:""})()}${esc(result(hm))}</span></div>`:"";
+
+  // Fixture
+  $("#fxEyebrow").textContent=`${c.short} · ${s.name} · ${t.div}`;
+  $("#rounds").innerHTML=t.f.map((f,i)=>`<button class="tab" role="tab" aria-selected="${i===st.round}" data-r="${i}">${esc(f.n)}</button>`).join("");
+  const fr=t.f[st.round];
+  $("#fixture").innerHTML=fr&&fr.m.length?fr.m.map(m=>{const p=played(m),hw=p&&m[2]>m[3],aw=p&&m[3]>m[2];
+    return `<div class="fx-item">
+      <div class="t ${aw?"l":"w"}">${badge(m[0])}<span>${esc(pretty(m[0]))}</span></div><div class="g num">${p?m[2]:""}</div>
+      <div class="t ${hw?"l":"w"}">${badge(m[1])}<span>${esc(pretty(m[1]))}</span></div><div class="g num">${p?m[3]:""}</div>
+      <div class="info"><span>${esc(fr.n)}</span><span class="${p?"":"next"}">${(()=>{const v=p&&vidFor(m[0],m[1]);return v?`<a class="vlink" href="https://www.youtube.com/watch?v=${v.id}" target="_blank" rel="noopener">Ver partido</a> `:""})()}${esc(result(m))}</span></div></div>`}).join(""):`<p class="empty">Esta fecha todavía no tiene partidos cargados.</p>`;
+  setTimeout(()=>{const a=$("#rounds [aria-selected=true]"),c=$("#rounds");if(a)c.scrollLeft=a.offsetLeft-c.offsetLeft-c.clientWidth/2+a.offsetWidth/2},0);
+
+  // Tabla
+  $("#tblEyebrow").textContent=`Posiciones · ${t.div}`;
+  $("#zones").innerHTML=t.z.length>1?t.z.map((z,i)=>`<button class="tab" role="tab" aria-selected="${i===st.zone}" data-z="${i}">Zona ${esc(z.n)}</button>`).join(""):"";
+  const z=t.z[st.zone]||{rows:[],cls:0}, fm=form(t), cls=(z.cls||0)>1?z.cls:0;
+  $("#table").innerHTML=z.rows.length?z.rows.map((x,i)=>`<tr class="${i<cls?"q":""}">
+    <td>${i+1}</td><td class="l"><div class="club">${badge(x[0])}<span>${esc(pretty(x[0]))}</span></div></td>
+    <td>${x[1]}</td><td>${x[2]}</td><td>${x[3]}</td><td>${x[4]}</td><td>${x[5]}</td><td>${x[6]}</td><td>${x[7]>0?"+":""}${x[7]}</td>
+    <td class="pts">${x[8]}</td><td><div class="form">${(fm[x[0]]||[]).slice(-5).map(f=>`<i class="${f}">${{W:"G",D:"E",L:"P"}[f]}</i>`).join("")}</div></td></tr>`).join(""):`<tr><td colspan="11" class="empty">Sin tabla cargada para esta división.</td></tr>`;
+  $("#legend").innerHTML=cls?`<span style="--c:var(--comp)">Zona de clasificación (primeros ${cls})</span>`:"";
+
+  // Números
+  const all=t.f.flatMap(f=>f.m.filter(m=>played(m)&&!m[4]).map(m=>({m,f:f.n})));
+  const rows=t.z.flatMap(z=>z.rows).filter(r=>r[1]>0);
+  const goles=all.reduce((a,x)=>a+x.m[2]+x.m[3],0);
+  const big=all.slice().sort((a,b)=>Math.abs(b.m[2]-b.m[3])-Math.abs(a.m[2]-a.m[3])||(b.m[2]+b.m[3])-(a.m[2]+a.m[3]))[0];
+  const most=all.slice().sort((a,b)=>(b.m[2]+b.m[3])-(a.m[2]+a.m[3]))[0];
+  const att=rows.slice().sort((a,b)=>b[5]-a[5])[0], def=rows.slice().sort((a,b)=>a[6]/a[1]-b[6]/b[1])[0];
+  const card=(lbl,big,sub,team)=>`<div class="stat">${team?badge(team,"badge"):""}<div><div class="eyebrow">${lbl}</div><div class="v num">${big}</div><div class="s">${sub}</div></div></div>`;
+  $("#numEyebrow").textContent=`${t.div} en números`;
+  $("#stats").innerHTML=all.length?[
+    card("Goles en el torneo",goles,`${(goles/all.length).toFixed(1).replace(".",",")} por partido · ${all.length} partidos`),
+    att?card("Mejor ataque",att[5],`${esc(pretty(att[0]))} · goles a favor`,att[0]):"",
+    def?card("Valla menos vencida",def[6],`${esc(pretty(def[0]))} · en ${def[1]} partidos`,def[0]):"",
+    big?card("Goleada más amplia",`${big.m[2]}–${big.m[3]}`,`${esc(pretty(big.m[0]))} vs ${esc(pretty(big.m[1]))} · ${esc(big.f)}`):"",
+    most&&most!==big?card("Partido con más goles",most.m[2]+most.m[3],`${esc(pretty(most.m[0]))} ${most.m[2]}–${most.m[3]} ${esc(pretty(most.m[1]))}`):""
+  ].join(""):`<p class="empty">Todavía no hay partidos jugados en esta división.</p>`;
+
+  const gm=k>=0?t.f[k].m.filter(played):[];
+  // App
+  $("#phone").innerHTML=`<img src="assets-ln-wordmark.png" alt="">`+gm.slice(0,4).map(m=>`<div class="mc"><span>${esc(pretty(m[0]).slice(0,16))}<br>${esc(pretty(m[1]).slice(0,16))}</span><b class="num">${m[2]}<br>${m[3]}</b></div>`).join("");
+}
+
+// Búsqueda de equipos
+let TEAMIDX=[];
+function buildIdx(){const m=new Map();for(const t of DB.torneos)for(const z of t.z)for(const r of z.rows){const k=r[0];if(!m.has(k))m.set(k,[]);m.get(k).push(t)}
+  TEAMIDX=[...m.entries()].map(([n,ts])=>({n,ts:ts.sort((a,b)=>b.id-a.id)}))}
+const norm=s=>s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+$("#q").addEventListener("input",e=>{const q=norm(e.target.value.trim());const box=$("#results");
+  if(q.length<2){box.hidden=true;return}
+  const hits=TEAMIDX.filter(x=>norm(x.n).includes(q)).slice(0,8);
+  box.innerHTML=hits.length?hits.map(h=>{const t=h.ts[0],c=COMPS.find(x=>x.id===t.comp);return `<button data-tid="${t.id}">${badge(h.n)}<span><b>${esc(pretty(h.n))}</b><small>${esc(c.short)} · ${esc(t.stage)} · ${esc(t.div)}</small></span></button>`}).join(""):`<p class="empty">No encontramos ese equipo.</p>`;
+  box.hidden=false});
+$("#results").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;goTid(+b.dataset.tid);$("#results").hidden=true;$("#q").value="";location.hash="#tablas"});
+document.addEventListener("click",e=>{if(!e.target.closest(".search"))$("#results").hidden=true});
+
+function goTid(id){const t=DB.torneos.find(x=>x.id===id);if(!t)return;st.comp=t.comp;st.stage=t.stage;st.tid=t.id;st.round=null;st.zone=0;render()}
+$("#comps").addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;st.comp=b.dataset.id;st.stage=null;st.tid=null;st.round=null;st.zone=0;render()});
+$("#cgrid").addEventListener("click",e=>{const a=e.target.closest(".ccard");if(!a)return;st.comp=a.dataset.id;st.stage=null;st.tid=null;st.round=null;st.zone=0;render()});
+$("#stage").addEventListener("change",e=>{st.stage=e.target.value;st.tid=null;st.round=null;st.zone=0;render()});
+$("#divs").addEventListener("click",e=>{const b=e.target.closest(".dv[data-tid]");if(!b)return;st.tid=+b.dataset.tid;st.round=null;st.zone=0;render()});
+$("#ticker").addEventListener("click",e=>{const b=e.target.closest(".tk");if(!b)return;st.tid=+b.dataset.tid;st.round=null;st.zone=0;render()});
+$("#rounds").addEventListener("click",e=>{const b=e.target.closest(".tab");if(!b)return;st.round=+b.dataset.r;render()});
+$("#zones").addEventListener("click",e=>{const b=e.target.closest(".tab");if(!b)return;st.zone=+b.dataset.z;render()});
+$("#accounts").innerHTML=ACCOUNTS.map(a=>`<span>${a}</span>`).join("");
+
+function nav(){const h=(location.hash||"#inicio").slice(1);document.querySelectorAll("#nav a").forEach(a=>{if(a.getAttribute("href")==="#"+h)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current")})}
+addEventListener("hashchange",nav);nav();
+
+
+
+
+// Videos de YouTube
+let VIDS=[], VIDX=new Map();
+const vkey=s=>String(s||"").toLowerCase().replace(/ñ/g,"n").replace(/[^a-z0-9]/g,"");
+const vidFor=(a,b)=>VIDX.get(vkey(a)+"|"+vkey(b))||VIDX.get(vkey(b)+"|"+vkey(a));
+fetch("videos.json").then(r=>r.json()).then(v=>{VIDS=v;v.forEach(x=>{if(x.a){const k=vkey(x.a)+"|"+vkey(x.b);if(!VIDX.has(k))VIDX.set(k,x)}});
+  const catN={SLL:"Superliga Lunes",JUV:"Copa Juvenil"};
+  $("#vids").innerHTML=v.filter(x=>x.img).slice(0,8).map(x=>`<a class="vid" href="https://www.youtube.com/watch?v=${x.id}" target="_blank" rel="noopener"><span class="th"><img src="${x.img}" alt="" loading="lazy"><span class="play"><i></i></span><span class="dur num">${esc(x.dur)}</span></span><b>${esc(pretty(x.t))}</b><small>${esc([catN[x.cat]||x.cat,x.tag==="NuñezLibertadores"?"Copa Núñez Libertadores":"",x.d].filter(Boolean).join(" · "))}</small></a>`).join("");
+  if(DB)render();
+}).catch(()=>{});
+
+// Noticias armadas con los resultados reales
+let MD=null;
+function renderNews(){
+  if(!DB||!MD)return;
+  const photos=(MD.galeria||[]).filter(g=>!g.v).map(g=>g.src); let pi=0; const ph=()=>photos.length?photos[(pi++)%photos.length]:"";
+  const items=[];
+  for(const c of COMPS){
+    const st0=stagesOf(c.id)[0]; if(!st0)continue;
+    for(const t of st0.list){
+      const k=lastPlayedRound(t); if(k<0)continue;
+      const ms=t.f[k].m.filter(m=>played(m)&&!m[4]);
+      for(const m of ms){const d=Math.abs(m[2]-m[3]);if(d>=4){const w=m[2]>m[3]?m[0]:m[1],l=m[2]>m[3]?m[1]:m[0],gw=Math.max(m[2],m[3]),gl=Math.min(m[2],m[3]);
+        items.push({score:d+(c.id==="primera"||c.cup?3:0),c,t,k,tag:"Goleada",title:`${pretty(w)} le ganó ${gw} a ${gl} a ${pretty(l)}`,text:`${c.name} · ${t.div} · ${t.f[k].n}. Una de las goleadas de la fecha.`})}}
+      const rows=t.z.flatMap(z=>z.rows).filter(r=>r[1]>0).sort((a,b)=>b[8]-a[8]||b[7]-a[7]);
+      if(rows[0]&&rows[0][1]>=3){const r=rows[0];const inv=r[4]===0;items.push({score:(inv?6:3)+(c.id==="primera"?4:0),c,t,k,tag:inv?"Invicto":"Puntero",title:inv?`${pretty(r[0])} sigue invicto y es líder`:`${pretty(r[0])} es el puntero de ${t.div.toLowerCase()}`,text:`${c.name} · ${r[8]} puntos en ${r[1]} partidos, ${r[5]} goles a favor y ${r[6]} en contra.`})}
+      const att=rows.slice().sort((a,b)=>b[5]-a[5])[0];
+      if(att&&att[5]>=15&&(c.id==="primera"||c.cup))items.push({score:4,c,t,k,tag:"Mejor ataque",title:`${pretty(att[0])}, el equipo más goleador`,text:`${att[5]} goles en ${att[1]} partidos en ${c.name} · ${t.div}.`});
+    }
+  }
+  const seen=new Set(), out=[];
+  items.sort((a,b)=>b.score-a.score).forEach(n=>{const key=n.c.id+n.tag;if(out.length<5&&!seen.has(key)){seen.add(key);out.push(n)}});
+  $("#news").innerHTML=out.map(n=>`<button class="nw" style="--c:${n.c.color}" data-tid="${n.t.id}">${photos.length?`<img src="${ph()}" alt="" loading="lazy">`:""}<div><span class="tag">${esc(n.tag)} · ${esc(n.c.short)}</span><h3>${esc(n.title)}</h3><p>${esc(n.text)}</p></div></button>`).join("")||`<p class="empty">Las noticias aparecen cuando se cargan los resultados de la fecha.</p>`;
+}
+$("#news").addEventListener("click",e=>{const b=e.target.closest(".nw");if(!b)return;goTid(+b.dataset.tid);location.hash="#partidos"});
+
+// Redes, sedes y galería (media.json)
+const ACCTS=[
+ {h:"liganunez",d:"Primera División, Copa Núñez Libertadores y Sudamericana",logo:"assets-ln-crest.png"},
+ {h:"liganunezplus",d:"Superligas y el resto de las divisiones",logo:"assets-plus.png"},
+ {h:"liganunezfem",d:"Liga Núñez FEM",logo:"assets-fem.png"},
+ {h:"lacopajuvenil",d:"Sub 16 y Sub 14",logo:"assets-juvenil.png"},
+ {h:"ligapuertomadero",d:"Liga Puerto Madero",logo:"assets-madero.png"},
+ {h:"ligamartinez",d:"Liga Martínez",logo:"assets-martinez.png"},
+ {h:"ligatigre",d:"Liga Tigre",logo:"assets-tigre.png"},
+ {h:"ligavillanueva",d:"Liga Villanueva",logo:"assets-villanueva.png"}];
+$("#accts").innerHTML=ACCTS.map(a=>`<a class="acct" href="https://www.instagram.com/${a.h}/" target="_blank" rel="noopener"><span class="lg"><img src="${a.logo}" alt="" onerror="this.remove()"></span><span><b>@${a.h}</b><small>${a.d}</small></span></a>`).join("")+`<a class="acct yt" href="https://www.youtube.com/@liganunez10" target="_blank" rel="noopener"><span class="lg"><img src="assets-ln-crest.png" alt=""></span><span><b>YouTube · @liganunez10</b><small>Liga Nuñez Canal Oficial: videos y resúmenes de los partidos</small></span></a>`;
+fetch("media.json").then(r=>r.json()).then(md=>{
+  MD=md;renderNews();
+  const sl=$("#slider");
+  if(md.fecha)$("#galEyebrow").textContent="Fotos de las últimas fechas · "+md.fecha;
+  sl.innerHTML=(md.galeria||[]).map(g=>`<figure class="slide ${g.v?"v":""}"><img src="${g.src}" alt="Foto de partido en ${esc(g.sede)}" loading="lazy"><figcaption>${esc(g.sede)} · ${esc(g.dia)}</figcaption></figure>`).join("")||`<p class="empty">Las fotos de la última fecha aparecen acá.</p>`;
+  $("#sedesGrid").innerHTML=(md.sedes||[]).map(s=>`<div class="sede">${s.src?`<img src="${s.src}" alt="Cancha de ${esc(s.nombre)}" loading="lazy">`:""}<div><b>${esc(s.nombre)}</b><small>${esc(s.dias.join(" · "))}</small></div></div>`).join("");
+}).catch(()=>{});
+const step=()=>Math.max(260,$("#slider").clientWidth*0.8);
+$("#galPrev").addEventListener("click",()=>$("#slider").scrollBy({left:-step()}));
+$("#galNext").addEventListener("click",()=>$("#slider").scrollBy({left:step()}));
+
+fetch("data.json").then(r=>r.json()).then(d=>{DB=d;ESC=d.escudos||{};
+  const g=new Date(d.generado);$("#updated").textContent="actualizado "+g.toLocaleDateString("es-AR",{day:"numeric",month:"long"})+" "+g.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"});
+  $("#foot").textContent=`© 2026 Liga Núñez · El mejor torneo de Argentina`;
+  buildIdx();renderComps();render();renderNews();
+}).catch(()=>{$("#heroTitle").textContent="No se pudieron cargar los datos";$("#heroText").textContent="Recargá la página en unos segundos."});
+</script>
+
+</body>
+</html>
