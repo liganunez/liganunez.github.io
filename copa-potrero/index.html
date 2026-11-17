@@ -157,6 +157,16 @@ tr.us td:first-child{color:var(--red)}
 .sp .ig{color:var(--gold-2);font-weight:700;font-size:.85rem;text-decoration:none;margin-top:auto}
 .sp .ig:hover{text-decoration:underline}
 .trainings{display:grid;gap:8px}
+.nm{background:#fff;border:1px solid var(--line);padding:22px 16px 20px;margin-bottom:12px;text-align:center}
+.nm-tag{display:block;font-weight:800;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--red);margin-bottom:12px}
+.nm-row{display:grid;grid-template-columns:1fr auto auto auto 1fr;align-items:center;gap:18px;max-width:760px;margin:0 auto}
+.nm-row img{width:72px;height:72px;object-fit:contain}
+.nm-t{font-size:1.45rem;text-transform:uppercase;line-height:1.15;text-align:left}.nm-t.r{text-align:right}
+.nm-h{font-size:2.3rem;font-weight:800}
+.nm-c{margin-top:10px;color:#8a877f;font-size:1.1rem;text-transform:uppercase;letter-spacing:.04em}
+.nm-tw{display:inline-flex;align-items:center;gap:12px;margin-top:6px;font-size:1.35rem}
+.nm-tw svg{width:34px;height:34px;fill:var(--ink)}
+@media (max-width:640px){.nm-row{gap:8px}.nm-row img{width:44px;height:44px}.nm-t{font-size:.85rem}.nm-h{font-size:1.5rem}}
 .tr{display:grid;grid-template-columns:110px auto 1fr auto;gap:18px;align-items:center;background:var(--paper);padding:14px 18px}
 .tr > *{min-width:0}
 .tr-date b{display:block;font-family:var(--display);font-weight:900;font-size:2.2rem;line-height:1;color:var(--red)}
@@ -546,6 +556,7 @@ footer .handles a{color:var(--paper);text-decoration:none}
 
   <section id="partidos">
     <div class="sec-head"><h2 class="it">Partidos <span>de la Copa</span></h2><p>Resultado, fotos y videos de cada partido de Liga Núñez en la Copa Potrero 2026.</p></div>
+    <div class="nm" aria-label="Próximo partido"><span class="nm-tag">Próximo partido · Mié 18/11</span><div class="nm-row"><span class="nm-t r">Liga Núñez</span><img src="escudos-cp-liga_nunez.png" alt="Liga Núñez"><b class="nm-h">15:00</b><img src="escudos-cp-social_y_deportivo.png" alt="Social y Deportivo"><span class="nm-t">Social y Deportivo</span></div><div class="nm-c">Cancha 1</div><div class="nm-tw">Miralo en <svg viewBox="0 0 24 24" aria-label="Twitch" role="img"><path d="M4.3 2 3 5.4v13.7h4.7V22h2.6l2.6-2.9h3.9L22 14V2H4.3zm15.8 11.1-3 3h-4.7l-2.6 2.6v-2.6H5.8V3.9h14.3v9.2zM17.2 6.9h-1.9v5.5h1.9V6.9zm-5.2 0h-1.9v5.5H12V6.9z"/></svg></div></div>
     <div class="trainings cp-games">
       <div class="tr played"><div class="tr-date"><b>15/11</b><span>Domingo</span></div><div class="tr-vs"><img src="escudos-liga_nunez.png" alt="Liga Núñez"><span>vs</span><img src="escudos-cp-el_kiosco.png" alt=""></div><div class="tr-body"><h3 class="it">vs El Kiosco <em class="tr-w">2-1</em></h3><p>¡Ganamos! Lo dimos vuelta en el debut.</p><p class="tr-goals">⚽ Fede Carrizo (asist. Fari) · ⚽ Pepe (asist. Fede Carrizo)</p></div><div class="tr-acts"><button type="button" class="tr-mat tr-rec tr-vid" data-vid="f1" aria-expanded="false">▶ Videos · 4</button><button type="button" class="tr-mat tr-btn" data-am="f1" data-n="20" aria-expanded="false">Ver fotos · 20</button></div></div>
       <div class="tr played"><div class="tr-date"><b>16/11</b><span>Lunes</span></div><div class="tr-vs"><img src="escudos-liga_nunez.png" alt="Liga Núñez"><span>vs</span><img src="escudos-cp-la_martona.png" alt=""></div><div class="tr-body"><h3 class="it">vs La Martona <em class="tr-l">0-1</em></h3><p>Perdimos por poco, con un gol anulado. Esto sigue.</p></div><div class="tr-acts"><button type="button" class="tr-mat tr-rec tr-vid" data-vid="f2" aria-expanded="false">▶ Videos · 4</button><button type="button" class="tr-mat tr-btn" data-am="f2" data-n="18" aria-expanded="false">Ver fotos · 18</button></div></div>
